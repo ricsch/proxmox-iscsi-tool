@@ -38,11 +38,36 @@ error_exit() {
 
 # Hauptmenü
 main_menu(){
-    MAINMENU = $(whiptail --title "Proxmox iSCSI Multipath Tool" --menu "Was möchtest du erledigen?" 25 78 16 \
+    MAINMENU=$(whiptail --title "Proxmox iSCSI Multipath Tool" --menu "Was möchtest du erledigen?" 25 78 16 \
     "Install" "Install Multipath and add iSCSI LUNs" \
     "Add" "Add iSCSI LUN" \
-    "Remove" "Remove iSCSI LUN")
-    echo MAINMENU
+    "Remove" "Remove iSCSI LUN" 3>&1 1>&2 2>&3)
+    exitstatus=$?
+    if [ $exitstatus = 0 ]; then
+    	echo "Your chosen option:" $MAINMENU
+    else
+        echo "You chose Cancel."
+    fi
+    case $MAINMENU in
+	Install)
+	collect_inputs
+	install_iscsi_tools
+	bind_iscsi_luns
+	install_multipath_tools
+	backup_multipath_conf
+	create_multipath_conf
+	restart_multipath_service
+	;;
+
+	Add)
+	;;
+
+	Remove)
+	;;
+esac
+    if [ $MAINMENU = "Install" ]; then  
+        echo "$MAINMENU"
+    fi
 }
 
 # Sammelt interaktiv die iSCSI-Parameter und WWID/Alias-Paare.
@@ -193,12 +218,5 @@ check_whiptail
 echo "=== Interaktive Konfiguration mit Whiptail wird gestartet ==="
 
 main_menu
-collect_inputs
-install_iscsi_tools
-bind_iscsi_luns
-install_multipath_tools
-backup_multipath_conf
-create_multipath_conf
-restart_multipath_service
 
 echo "=== Multipath Konfiguration abgeschlossen ==="
