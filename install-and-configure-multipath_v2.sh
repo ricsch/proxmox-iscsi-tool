@@ -229,10 +229,12 @@ add_multipath_entry() {
 }
 
 remove_multipath_entry() {
-    local target_wwid="$1"
+    # Abfrage des WWID mittels Whiptail
+    local target_wwid
+    target_wwid=$(whiptail --inputbox "Geben Sie die WWID des Multipath-Eintrags ein, der entfernt werden soll:" 10 60 "" --title "Multipath entfernen" 3>&1 1>&2 2>&3)
+    
     if [ -z "$target_wwid" ]; then
-        echo "Usage: remove_multipath_entry <WWID>" >&2
-        return 1
+        error_exit "Keine WWID eingegeben. Abbruch."
     fi
 
     # Erstelle eine neue Version der multipath.conf, in der der Multipath-Block
@@ -273,8 +275,9 @@ remove_multipath_entry() {
     # Überschreibe die Originaldatei mit der neuen Version
     mv /tmp/multipath.conf.new /etc/multipath.conf || return 1
 
-    echo "Multipath-Eintrag mit WWID '$target_wwid' wurde entfernt (falls vorhanden)."
+    whiptail --msgbox "Multipath-Eintrag mit WWID '$target_wwid' wurde entfernt (falls vorhanden)." 10 60 --title "Erfolg"
 }
+
 
 #############################################
 # Hauptprogramm
