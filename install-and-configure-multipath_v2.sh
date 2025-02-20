@@ -60,9 +60,13 @@ main_menu(){
 	;;
 
 	Add)
+	collect_inputs
+    bind_iscsi_luns
+    add_multipath_entry
 	;;
 
 	Remove)
+    remove_multipath_entry
 	;;
 esac
     if [ $MAINMENU = "Install" ]; then  
@@ -206,6 +210,70 @@ restart_multipath_service() {
     systemctl restart multipath-tools || error_exit "Neustart von multipath-tools fehlgeschlagen."
     echo "Aktueller Multipath-Status:"
     multipath -ll
+}
+
+# Fügt einen neuen Multipath-Eintrag in die multipaths-Sektion der /etc/multipath.conf ein.
+add_multipath_entry() {
+    # Füge den neuen Eintrag vor der letzten Zeile der multipath.conf ein.
+    # Wir gehen davon aus, dass die letzte Zeile die schließende Klammer "}" des multipaths-Blocks ist.
+    for pair in "${wwid_alias_pairs[@]}"; do
+        IFS=":" read -r WWID ALIAS <<< "$pair"
+    sed -i "\$i\\
+    multipath {\\
+        wwid \"$NWWID\"\\
+        alias \"$ALIAS\"\\
+    }" /etc/multipath.conf
+    done
+
+    whiptail --msgbox "Neuer Multipath-Eintrag wurde hinzugefügt." 10 50 --title "Erfolg"
+}
+
+remove_multipath_entry() {
+    local target_wwid="$1"
+    if [ -z "$target_wwid" ]; then
+        echo "Usage: remove_multipath_entry <WWID>" >&2
+        return 1
+    fi
+
+    # Erstelle eine neue Version der multipath.conf, in der der Multipath-Block
+    # mit der übergebenen WWID nicht enthalten ist.
+    awk -v wwid="$target_wwid" '
+    BEGIN { in_block = 0; block = "" }
+    {
+      # Erkenne den Beginn eines multipath-Blocks
+      if ($0 ~ /^[[:space:]]*multipath[[:space:]]*{/) {
+         in_block = 1;
+         block = $0 "\n";
+         next;
+      }
+      # Falls wir uns in einem multipath-Block befinden, sammle die Zeilen
+      if (in_block) {
+         block = block $0 "\n";
+         # Erkenne das Ende des Blocks
+         if ($0 ~ /^[[:space:]]*}/) {
+            in_block = 0;
+            # Enthält der Block die Ziel-WWID, so wird er verworfen (also nicht ausgegeben)
+            if (block ~ wwid) {
+               block = "";
+               next;
+            } else {
+               # Andernfalls gib den gesamten Block aus
+               printf "%s", block;
+               block = "";
+               next;
+            }
+         }
+         next;
+      }
+      # Alle anderen Zeilen werden unverändert ausgegeben
+      print $0;
+    }
+    ' /etc/multipath.conf > /tmp/multipath.conf.new || return 1
+
+    # Überschreibe die Originaldatei mit der neuen Version
+    mv /tmp/multipath.conf.new /etc/multipath.conf || return 1
+
+    echo "Multipath-Eintrag mit WWID '$target_wwid' wurde entfernt (falls vorhanden)."
 }
 
 #############################################
