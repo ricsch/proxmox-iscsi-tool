@@ -38,10 +38,10 @@ error_exit() {
 
 # Hauptmenü
 main_menu(){
-    MAINMENU = whiptail --title "Proxmox iSCSI Multipath Tool" --menu "Was möchtest du erledigen?" 25 78 16 \
+    MAINMENU = $(whiptail --title "Proxmox iSCSI Multipath Tool" --menu "Was möchtest du erledigen?" 25 78 16 \
     "Install" "Install Multipath and add iSCSI LUNs" \
     "Add" "Add iSCSI LUN" \
-    "Remove" "Remove iSCSI LUN"
+    "Remove" "Remove iSCSI LUN")
     echo MAINMENU
 }
 
