@@ -40,7 +40,8 @@ error_exit() {
 main_menu(){
     whiptail --title "Proxmox iSCSI Multipath Tool" --menu "Was möchtest du erledigen?" 25 78 16 \
     "Install" "Install Multipath and add iSCSI LUNs" \
-    "Add" "Add iSCSI LUN" "Remove iSCSI LUN"
+    "Add" "Add iSCSI LUN" \
+    "Remove" "Remove iSCSI LUN"
 }
 
 # Sammelt interaktiv die iSCSI-Parameter und WWID/Alias-Paare.
