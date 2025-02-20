@@ -89,7 +89,7 @@ collect_inputs() {
     wwid_alias_pairs=()   # Format: WWID:Alias
 
     for (( i=1; i<=NUM_ENTRIES; i++ )); do
-        iscsi_params=$(whiptail --inputbox "Eintrag $i:\nGeben Sie die BASE_STORAGE_ID ein (z.B. iscsi-storage1), dann das iSCSI-Target ein (z.B. iqn.2001-04.com.example:storage.target und zuletzt die LUN (z.B. 1). Bitte | als Trenner nutzen. Keine Leerzeichen. Danke. :" 10 60 "" --title "BASE_STORAGE_ID" 3>&1 1>&2 2>&3)
+        iscsi_params=$(whiptail --inputbox "Eintrag $i:\nGeben Sie die BASE_STORAGE_ID ein (z.B. iscsi-storage1), dann das iSCSI-Target ein (z.B. iqn.2001-04.com.example:storage.target und zuletzt die LUN (z.B. 1). Bitte | als Trenner nutzen. Keine Leerzeichen. Danke. Also BASE_STORAGE_ID|TARGET|LUN:" 20 60 "" --title "BASE_STORAGE_ID" 3>&1 1>&2 2>&3)
         WWID=$(whiptail --inputbox "Eintrag $i:\nGeben Sie die WWID ein (z.B. 36001405abcd1234):" 10 60 "" --title "WWID" 3>&1 1>&2 2>&3)
         ALIAS=$(whiptail --inputbox "Eintrag $i:\nGeben Sie den Alias ein (z.B. mydisk1):" 10 60 "" --title "Alias" 3>&1 1>&2 2>&3)
 
