@@ -62,16 +62,15 @@ main_menu(){
 	Add)
 	collect_inputs
     bind_iscsi_luns
+    backup_multipath_conf
     add_multipath_entry
 	;;
 
 	Remove)
+    backup_multipath_conf
     remove_multipath_entry
 	;;
 esac
-    if [ $MAINMENU = "Install" ]; then  
-        echo "$MAINMENU"
-    fi
 }
 
 # Sammelt interaktiv die iSCSI-Parameter und WWID/Alias-Paare.
@@ -90,18 +89,14 @@ collect_inputs() {
     wwid_alias_pairs=()   # Format: WWID:Alias
 
     for (( i=1; i<=NUM_ENTRIES; i++ )); do
-        BASE_STORAGE_ID=$(whiptail --inputbox "Eintrag $i:\nGeben Sie die BASE_STORAGE_ID ein (z.B. iscsi-storage1):" 10 60 "" --title "BASE_STORAGE_ID" 3>&1 1>&2 2>&3)
-        TARGET=$(whiptail --inputbox "Eintrag $i:\nGeben Sie das iSCSI-Target ein (z.B. iqn.2001-04.com.example:storage.target):" 10 60 "" --title "iSCSI Target" 3>&1 1>&2 2>&3)
-        LUN=$(whiptail --inputbox "Eintrag $i:\nGeben Sie die LUN ein (z.B. 1):" 8 60 "" --title "LUN" 3>&1 1>&2 2>&3)
+        iscsi_params=$(whiptail --inputbox "Eintrag $i:\nGeben Sie die BASE_STORAGE_ID ein (z.B. iscsi-storage1), dann das iSCSI-Target ein (z.B. iqn.2001-04.com.example:storage.target und zuletzt die LUN (z.B. 1). Bitte | als Trenner nutzen. Keine Leerzeichen. Danke. :" 10 60 "" --title "BASE_STORAGE_ID" 3>&1 1>&2 2>&3)
         WWID=$(whiptail --inputbox "Eintrag $i:\nGeben Sie die WWID ein (z.B. 36001405abcd1234):" 10 60 "" --title "WWID" 3>&1 1>&2 2>&3)
         ALIAS=$(whiptail --inputbox "Eintrag $i:\nGeben Sie den Alias ein (z.B. mydisk1):" 10 60 "" --title "Alias" 3>&1 1>&2 2>&3)
 
         # Minimalvalidierung der Eingaben
-        if [ -z "$BASE_STORAGE_ID" ] || [ -z "$TARGET" ] || [ -z "$LUN" ] || [ -z "$WWID" ] || [ -z "$ALIAS" ]; then
+        if [ -z "$iscsi_params" ] || [ -z "$WWID" ] || [ -z "$ALIAS" ]; then
             error_exit "Alle Felder müssen ausgefüllt werden. Abbruch."
         fi
-
-        iscsi_params+=("${BASE_STORAGE_ID}|${TARGET}|${LUN}")
         wwid_alias_pairs+=("${WWID}:${ALIAS}")
     done
 }
