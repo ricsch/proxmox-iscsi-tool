@@ -195,8 +195,8 @@ EOF
     cat >> /etc/multipath.conf <<'EOF'
 }
 EOF
-
     echo "Neue Konfiguration in /etc/multipath.conf geschrieben."
+    echo "=== Multipath Konfiguration abgeschlossen ==="
 }
 
 # Startet den Multipath-Dienst neu und zeigt den Status an.
@@ -285,4 +285,3 @@ echo "=== Interaktive Konfiguration mit Whiptail wird gestartet ==="
 
 main_menu
 
-echo "=== Multipath Konfiguration abgeschlossen ==="
